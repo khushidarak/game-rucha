@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON DODGE • Cyber Arena</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --neon-blue: #00f0ff;
+  --neon-pink: #ff00c8;
+  --neon-purple: #b967ff;
+  --dark-bg: #020814;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--dark-bg);
+  color: white;
+  font-family: 'Exo 2', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.screen {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  padding: 20px;
+  text-align: center;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#loading {
+  background: radial-gradient(circle, var(--dark-bg) 0%, #00030a 100%);
+}
+
+#loading h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3.5rem;
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.7);
+  margin-bottom: 1.5rem;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid var(--neon-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  align-content: center;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* MENU SCREEN - CENTERED */
+#menu {
+  background: rgba(10, 20, 40, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+  max-width: 500px;
+  left: 35%;
+  width: 90%;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#menu h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--neon-blue);
+  text-align: center;
+}
+
+input, button {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 12px;
+  outline: none;
+  margin: 8px 0;
+  font-family: 'Exo 2', sans-serif;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+input {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+button {
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+  color: black;
+  font-weight: 600;
+  font-family: 'Orbitron', sans-serif;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 240, 255, 0.4);
+}
+
+button.secondary {
+  background: linear-gradient(90deg, var(--neon-pink), #ff006e);
+}
+
+/* HOW TO PLAY */
+#how-to {
+  background: rgba(10, 20, 40, 0.9);
+  border: 1px solid rgba(185, 103, 255, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 0 30px rgba(185, 103, 255, 0.2);
+  max-width: 550px;
+  width: 90%;
+  left: 10%;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+#how-to h2 {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--neon-purple);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.rules {
+  line-height: 0.92;
+  margin-bottom: 1.5rem;
+  left: 37%;
+}
+
+.rules p {
+  margin: 10px 0;
+}
+
+.key {
+  display: inline-block;
+  background: rgba(0, 240, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Orbitron', sans-serif;
+  color: var(--neon-blue);
+}
+
+/* GAME SCREEN */
+#game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+}
+
+canvas {
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  border-radius: 16px;
+  background: rgba(5, 10, 25, 0.9);
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+  max-width: 100%;
+  max-height: 85vh;
+}
+
+#hud {
+  display: flex;
+  justify-content: space-between;
+  width: 400px;
+  max-width: 90%;
+  margin-top: 15px;
+  padding: 12px 20px;
+  background: rgba(10, 20, 40, 0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+#score, #health {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+}
+
+#health-bar {
+  width: 100px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+#health-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff9d, var(--neon-blue));
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+/* GAME OVER */
+#over {
+  background: rgba(10, 20, 40, 0.9);
+  border: 1px solid rgba(255, 0, 200, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 0 30px rgba(255, 0, 200, 0.2);
+  max-width: 500px;
+  width: 90%;
+  right: 15%;
+  position: relative;
+  z-index: 10;
+}
+
+#over h1 {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--neon-pink);
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+#final {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.8rem;
+  margin: 1.2rem 0;
+  color: var(--neon-blue);
+}
+
+/* QUIT SCREEN - MATCHES YOUR SECOND IMAGE */
+#quitScreen {
+  background: var(--dark-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  right: 40%;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+#quitScreen h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.8rem;
+  margin-bottom: 1rem;
+  color: white;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+#quitScreen p {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+  color: #cccccc;
+  line-height: 1.5;
+}
+
+/* SHORTER MENU BUTTON FOR QUIT SCREEN */
+#quitMenuBtn {
+  width: 60%; /* Shorter than full width */
+  max-width: 500px;
+  padding: 14px;
+  margin-top: 20px;
+  background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+  color: black;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+#quitMenuBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 240, 255, 0.4);
+}
+
+#countdown {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 5rem;
+  color: var(--neon-pink);
+  text-shadow: 0 0 20px rgba(255, 0, 200, 0.7);
+  display: none;
+  z-index: 10;
+}
+
+.mobile-controls {
+  display: none;
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  justify-content: center;
+  gap: 20px;
+}
+
+.mobile-btn {
+  width: 60px;
+  height: 60px;
+  background: rgba(10, 20, 40, 0.7);
+  border: 2px solid var(--neon-blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--neon-blue);
+  font-weight: bold;
+  user-select: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-controls {
+    display: flex;
+  }
+  canvas {
+    width: 95vw;
+    height: 70vh;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Screens -->
+<div id="loading" class="screen active">
+  <h1>NEON DODGE</h1>
+  <div class="loader"></div>
+</div>
+
+<div id="menu" class="screen">
+  <h1>BLOCK DODGE</h1>
+  <input id="name" type="text" placeholder="Enter your name" maxlength="15" />
+  <button id="play">START GAME</button>
+  <button id="howToBtn">HOW TO PLAY</button>
+</div>
+
+<div id="how-to" class="screen">
+  <h2>🎮 HOW TO PLAY</h2>
+  <div class="rules">
+    <p>• <strong>Objective</strong>: Dodge falling blocks and survive as long as possible!</p>
+    <p>• <strong>Health</strong>: You start with 100% health. Each hit reduces health by 25%.</p>
+    <p>• <strong>Game Over</strong>: When health reaches 0%, the game ends.</p>
+    <p>• <strong>Power-Ups</strong>:</p>
+    <p>  - <span style="color:#4a90e2">🔵 Blue Shield</span>: Restores 25% health</p>
+    <p>  - <span style="color:#00eeff">⚡ Cyan Dash</span>: Reduces dash cooldown</p>
+    <p>  - <span style="color:#ffd700">⭐ Gold Star</span>: Adds 15 points to your score</p>
+  </div>
+  <h3 style="margin: 10px 0 10px; color: var(--neon-blue);">KEY CONTROLS</h3>
+  <p>Move Left: <span class="key">←</span> or <span class="key">A</span></p>
+  <p>Move Right: <span class="key">→</span> or <span class="key">D</span></p>
+  <p>Dash: <span class="key">SPACE</span> (teleports in current direction)</p>
+  <button id="backFromHowTo" style="margin-top:20px;">BACK TO MENU</button>
+</div>
+
+<div id="game-container" class="screen">
+  <canvas id="c" width="400" height="600"></canvas>
+  <div id="hud">
+    <div>
+      <div id="score">Score: 0</div>
+    </div>
+    <div>
+      <div id="health">Health: 100%</div>
+      <div id="health-bar"><div id="health-fill" style="width: 100%"></div></div>
+    </div>
+  </div>
+  <div class="mobile-controls">
+    <div class="mobile-btn" id="leftBtn">←</div>
+    <div class="mobile-btn" id="dashBtn">⚡</div>
+    <div class="mobile-btn" id="rightBtn">→</div>
+  </div>
+</div>
+
+<div id="over" class="screen">
+  <h1>MISSION FAILED</h1>
+  <div id="final">Score: 0</div>
+  <button id="again">RETRY</button>
+  <button id="showBoard">LEADERBOARD</button>
+  <button id="quit" class="secondary">QUIT</button>
+</div>
+
+<div id="board" class="screen">
+  <h1>LEADERBOARD</h1>
+  <ol id="list" style="color:white; margin:20px 0; list-style:none; padding:0;"></ol>
+  <button id="back">BACK</button>
+</div>
+
+<div id="quitScreen" class="screen">
+  <h1>Thanks for Playing!</h1>
+  <p>Your journey ends here.<br>Come back soon!</p>
+  <button id="quitMenuBtn">MENU</button>
+</div>
+
+<div id="countdown"></div>
+
+<script>
+// Sound system using Web Audio API
+let audioContext;
+let sounds = {};
+
+function initAudio() {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function createTone(frequency, duration = 0.1, type = 'sine') {
+      return {
+        play: () => {
+          if (audioContext.state === 'suspended') {
+            audioContext.resume();
+          }
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          oscillator.type = type;
+          oscillator.frequency.value = frequency;
+          gainNode.gain.value = 0.1;
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          const startTime = audioContext.currentTime;
+          oscillator.start(startTime);
+          oscillator.stop(startTime + duration);
+        }
+      };
+    }
+    
+    // Create all sounds
+    sounds.intro = createTone(300, 1.5, 'sine');
+    sounds.dodge = createTone(800, 0.05, 'square');
+    sounds.powerup = createTone(600, 0.12, 'sine');
+    sounds.hit = createTone(200, 0.15, 'sawtooth');
+    sounds.gameOver = createTone(150, 1.0, 'sine');
+    
+    // Play intro sound after a short delay
+    setTimeout(() => {
+      if (sounds.intro) sounds.intro.play();
+    }, 1000);
+    
+    return true;
+  } catch (e) {
+    console.warn("Audio not supported:", e);
+    const silent = { play: () => {} };
+    sounds = {
+      intro: silent,
+      dodge: silent,
+      powerup: silent,
+      hit: silent,
+      gameOver: silent
+    };
+    return false;
+  }
+}
+
+// Initialize game
+const cv = document.getElementById("c");
+const ctx = cv.getContext("2d");
+
+const screens = {
+  loading: document.getElementById("loading"),
+  menu: document.getElementById("menu"),
+  howTo: document.getElementById("how-to"),
+  game: document.getElementById("game-container"),
+  over: document.getElementById("over"),
+  board: document.getElementById("board"),
+  quit: document.getElementById("quitScreen"),
+  countdown: document.getElementById("countdown")
+};
+
+let player, blocks, powerUps, score, speed, timer, running = false, ended = false, name = "";
+let keys = {};
+let health = 100;
+let dashCooldown = 0;
+let leader = JSON.parse(localStorage.getItem("leader") || "[]");
+
+// Initialize audio
+initAudio();
+
+// Mobile controls
+document.getElementById("leftBtn").addEventListener("touchstart", () => keys["ArrowLeft"] = true);
+document.getElementById("leftBtn").addEventListener("touchend", () => keys["ArrowLeft"] = false);
+document.getElementById("rightBtn").addEventListener("touchstart", () => keys["ArrowRight"] = true);
+document.getElementById("rightBtn").addEventListener("touchend", () => keys["ArrowRight"] = false);
+document.getElementById("dashBtn").addEventListener("touchstart", () => {
+  if (dashCooldown <= 0) {
+    keys[" "] = true;
+    setTimeout(() => keys[" "] = false, 100);
+  }
+});
+
+document.addEventListener("keydown", e => {
+  keys[e.key] = true;
+  if (e.key === " ") e.preventDefault();
+});
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+function resetGame() {
+  player = { x: 180, y: 550, w: 40, h: 40, s: 6 };
+  blocks = [];
+  powerUps = [];
+  score = 0;
+  health = 100;
+  speed = 3;
+  timer = 0;
+  dashCooldown = 0;
+  ended = false;
+  document.getElementById("health-fill").style.width = "100%";
+}
+
+function spawnBlock() {
+  const w = 30 + Math.random() * 40;
+  const x = Math.random() * (cv.width - w);
+  blocks.push({ x, y: -40, w, h: 40, color: `hsl(${Math.random() * 360}, 70%, 60%)` });
+}
+
+function spawnPowerUp() {
+  const types = ["shield", "dash", "score"];
+  const type = types[Math.floor(Math.random() * types.length)];
+  const x = Math.random() * (cv.width - 30);
+  powerUps.push({ x, y: -30, w: 30, h: 30, type });
+}
+
+function update() {
+  if (!running || ended) return;
+  
+  // Player movement
+  if (keys["ArrowLeft"] || keys["a"] || keys["A"]) {
+    if (player.x > 0) player.x -= player.s;
+  }
+  if (keys["ArrowRight"] || keys["d"] || keys["D"]) {
+    if (player.x + player.w < cv.width) player.x += player.s;
+  }
+  
+  // Dash ability
+  if (keys[" "] && dashCooldown <= 0) {
+    if (keys["ArrowLeft"] || keys["a"] || keys["A"]) {
+      player.x = Math.max(0, player.x - 100);
+    } else if (keys["ArrowRight"] || keys["d"] || keys["D"]) {
+      player.x = Math.min(cv.width - player.w, player.x + 100);
+    }
+    dashCooldown = 60;
+    sounds.powerup.play();
+  }
+  
+  if (dashCooldown > 0) dashCooldown--;
+  
+  // Spawn objects
+  timer++;
+  if (timer > 35) {
+    spawnBlock();
+    if (Math.random() > 0.7) spawnPowerUp();
+    timer = 0;
+  }
+  
+  // Update blocks
+  blocks.forEach(b => b.y += speed);
+  blocks = blocks.filter(b => b.y < cv.height);
+  
+  // Update power-ups
+  powerUps.forEach(p => p.y += speed);
+  powerUps = powerUps.filter(p => p.y < cv.height);
+  
+  // Block collisions
+  for (let b of blocks) {
+    if (b.x < player.x + player.w && 
+        b.x + b.w > player.x && 
+        b.y < player.y + player.h && 
+        b.y + b.h > player.y) {
+      
+      health -= 25;
+      document.getElementById("health-fill").style.width = health + "%";
+      sounds.hit.play();
+      blocks = blocks.filter(bl => bl !== b);
+      
+      if (health <= 0) {
+        endGame();
+      }
+    }
+  }
+  
+  // Power-up collisions
+  for (let p of powerUps) {
+    if (p.x < player.x + player.w && 
+        p.x + p.w > player.x && 
+        p.y < player.y + player.h && 
+        p.y + p.h > player.y) {
+      
+      if (p.type === "shield") {
+        health = Math.min(100, health + 25);
+        document.getElementById("health-fill").style.width = health + "%";
+      } else if (p.type === "dash") {
+        dashCooldown = Math.max(0, dashCooldown - 30);
+      } else if (p.type === "score") {
+        score += 15;
+      }
+      
+      sounds.powerup.play();
+      powerUps = powerUps.filter(pp => pp !== p);
+    }
+  }
+  
+  // Play dodge sound for every block that passes
+  if (score > 0 && score % 10 === 0) {
+    sounds.dodge.play();
+  }
+  
+  score += 2;
+  if (score % 300 === 0) speed += 0.2;
+  
+  document.getElementById("score").textContent = "Score: " + score;
+  document.getElementById("health").textContent = "Health: " + health + "%";
+}
+
+function draw() {
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  
+  if (!running) return;
+  
+  // Draw grid
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x < cv.width; x += 40) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, cv.height);
+    ctx.stroke();
+  }
+  
+  // Draw player
+  ctx.fillStyle = "#00eeff";
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+  
+  // Draw blocks
+  for (let b of blocks) {
+    ctx.fillStyle = b.color;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+  }
+  
+  // Draw power-ups
+  for (let p of powerUps) {
+    ctx.fillStyle = p.type === "shield" ? "#4a90e2" : p.type === "dash" ? "#00eeff" : "#ffd700";
+    ctx.beginPath();
+    ctx.arc(p.x + p.w/2, p.y + p.h/2, p.w/2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function startCountdown() {
+  Object.values(screens).forEach(s => {
+    if (s !== screens.countdown) s.classList.remove("active");
+  });
+  
+  screens.countdown.style.display = "block";
+  let count = 3;
+  screens.countdown.textContent = count;
+  
+  const interval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      screens.countdown.textContent = count;
+    } else if (count === 0) {
+      screens.countdown.textContent = "GO!";
+    } else {
+      clearInterval(interval);
+      screens.countdown.style.display = "none";
+      startGame();
+    }
+  }, 1000);
+}
+
+function startGame() {
+  resetGame();
+  running = true;
+  screens.game.classList.add("active");
+}
+
+function endGame() {
+  ended = true;
+  running = false;
+  sounds.gameOver.play();
+  screens.game.classList.remove("active");
+  screens.over.classList.add("active");
+  document.getElementById("final").textContent = "Score: " + score;
+  
+  leader.push({ n: name, s: score });
+  leader.sort((a, b) => b.s - a.s);
+  leader = leader.slice(0, 10);
+  localStorage.setItem("leader", JSON.stringify(leader));
+}
+
+function showBoard() {
+  screens.over.classList.remove("active");
+  screens.board.classList.add("active");
+  
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  
+  leader.forEach((entry, i) => {
+    const li = document.createElement("li");
+    li.textContent = `${i+1}. ${entry.n} - ${entry.s}`;
+    li.style.padding = "8px";
+    li.style.borderRadius = "5px";
+    li.style.margin = "5px 0";
+    li.style.background = "rgba(255,255,255,0.05)";
+    list.appendChild(li);
+  });
+}
+
+// Button event listeners
+document.getElementById("play").onclick = () => {
+  const val = document.getElementById("name").value.trim();
+  if (!val) {
+    alert("Please enter your name!");
+    return;
+  }
+  name = val;
+  screens.loading.classList.remove("active");
+  screens.menu.classList.remove("active");
+  startCountdown();
+};
+
+document.getElementById("howToBtn").onclick = () => {
+  screens.menu.classList.remove("active");
+  screens.howTo.classList.add("active");
+};
+
+document.getElementById("backFromHowTo").onclick = () => {
+  screens.howTo.classList.remove("active");
+  screens.menu.classList.add("active");
+};
+
+document.getElementById("again").onclick = () => {
+  screens.over.classList.remove("active");
+  startCountdown();
+};
+
+document.getElementById("showBoard").onclick = showBoard;
+
+document.getElementById("quit").onclick = () => {
+  screens.over.classList.remove("active");
+  screens.quit.classList.add("active");
+};
+
+document.getElementById("back").onclick = () => {
+  screens.board.classList.remove("active");
+  screens.menu.classList.add("active");
+};
+
+document.getElementById("quitMenuBtn").onclick = () => {
+  screens.quit.classList.remove("active");
+  screens.menu.classList.add("active");
+};
+
+// Auto-hide loading
+setTimeout(() => {
+  screens.loading.classList.remove("active");
+  screens.menu.classList.add("active");
+}, 2000);
+
+loop();
+</script>
+</body>
+</html>
